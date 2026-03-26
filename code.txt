@@ -1,0 +1,120 @@
+\section{Literature Review}
+
+This chapter provides a comprehensive and systematic review of the existing literature, theoretical frameworks, and technological paradigms relevant to the development of Neuralens. As the field of assistive technology shifts from passive mechanical aids to proactive intelligent systems, the necessity of understanding the synergy between high-performance hardware, optimized computer vision, and social intelligence becomes paramount. 
+
+The review examines the historical trajectory of assistive devices, ranging from the rudimentary white cane to architectural innovations in edge-based computer vision. It synthesizes research into two distinct but interrelated domains: \textbf{General Navigation}, powered by object detection and Multimodal Large Language Models (LLMs), and \textbf{Social Interaction}, driven by deep biometric embedding architectures.
+
+The primary objective is to contextualize Neuralens within the broader spectrum of "Electronic Travel Aids" (ETAs). By integrating findings from embedded systems, cognitive psychology, and deep learning, this chapter argues that the current state-of-the-art (SOTA) is fragmented between high-latency cloud solutions and low-intelligence local systems. The review establishes a theoretical foundation for a hybrid "Edge-Cloud" approach, detailing the physics of edge-based computation, the evolution of YOLO and FaceNet architectures, and the psychological impact of automated feedback.
+
+\subsection{Background and Theoretical Foundations: The Edge Paradigm}
+Neuralens is positioned at the intersection of Internet of Things (IoT) hardware and Advanced Machine Learning (ML). This section explores the foundational theories enabling this convergence, specifically the decentralization of intelligence.
+
+\subsubsection{Edge Computing and the Raspberry Pi Ecosystem}
+The shift from cloud-centric AI to edge computing is a response to the latency, bandwidth, and privacy requirements of real-time assistive systems. In the context of visual impairment, the "Sense-Think-Act" loop must be near-instantaneous. A delay of even 500 milliseconds can represent several feet of movement for a pedestrian, potentially leading to accidents. Literature identifies the Raspberry Pi 4B as a benchmark for portable edge-AI due to its Quad-core Cortex-A72 (ARM v8) 64-bit SoC \cite{Dong2022}.
+
+\paragraph{Architectural Constraints and ARM NEON SIMD}
+The theoretical advantage of the ARM v8 architecture lies in its implementation of the \textbf{Advanced SIMD (Single Instruction, Multiple Data)} architecture, known as NEON. NEON technology is essential for deep learning because it allows the CPU to perform parallel mathematical operations on 128-bit vectors. This is particularly relevant for the convolutional layers of neural networks (both YOLO and FaceNet), where the same operation (multiplication and accumulation) is applied across massive image tensors. 
+
+Mathematically, a NEON-enabled core can process multiple floating-point operations in a single clock cycle:
+$$ \vec{V}_{res}[i] = \sum_{k=0}^{n} (\vec{V}_a[i,k] \times \vec{V}_b[k,j]) + \vec{V}_c[i,j] $$
+Research by \cite{MDPI2024} and \cite{viama2024ncnn} highlights that this hardware acceleration is the primary enabler for processing high-definition video streams without the thermal and physical bulk of traditional mobile workstations. Beyond raw FLOPS, the BCM2711 chipset's ability to manage concurrent DMA (Direct Memory Access) transfers from the camera sensor to the RAM is a vital theoretical component in reducing "jitter" in the detection pipeline.
+
+\subsection{Domain I: Navigation and Scene Understanding}
+The development of aids for the visually impaired (VI) has progressed through distinct technological eras, attempting to solve the "Mobility-Information" paradox.
+
+\subsubsection{Historical Evolution: From Mechanical to Electronic}
+Historically, the white cane and guide dogs have served as the primary means of navigation. The white cane provides 1:1 tactile feedback but offers no information about head-level obstacles. Guide dogs offer intelligent navigation but involve a high "maintenance cost" and biological constraints \cite{Cureus2025}. 
+
+The 1970s and 80s introduced ETAs using ultrasonic sensors and lasers. However, longitudinal studies indicate that these systems often lead to \textbf{"Sensory Fatigue"}. Because the feedback is abstract (beeps or vibrations), the user must dedicate significant cognitive resources to "decode" the signals. Research in \cite{Cureus2025} argues that this constant decoding leads to higher stress levels compared to biological aids. Modern smartphone apps (e.g., Microsoft Seeing AI) utilize cloud APIs but are limited by ergonomics and dependence on high-speed internet, creating dangerous latency in "dead zones" \cite{arXiv2024}.
+
+\subsubsection{Object Detection: The YOLO Paradigm}
+Neuralens utilizes YOLOv8, the latest iteration of the "You Only Look Once" family. The YOLO lineage represents a shift away from two-stage detectors to single-shot inference.
+
+\paragraph{C2f and Gradient Flow Optimization}
+YOLOv8 introduces the \textbf{C2f (Cross-stage Partial Bottleneck with two Convolutions)} module. This module enhances gradient flow during backpropagation by splitting feature maps and merging them after multiple convolutions. This design retains low-level spatial features (for small obstacles) alongside high-level semantic features (for classification), mitigating the "gradient vanish" problem on edge devices \cite{ResearchGate2024}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/yolov8n.jpg}
+    \caption{YOLOv8n Architecture}
+\end{figure}
+
+\paragraph{Mathematical Loss Functions}
+The loss function in YOLOv8 is a composite designed to handle class imbalance, critical for reducing false positives:
+$$ \mathcal{L}_{total} = \lambda_{box} \mathcal{L}_{CIoU} + \lambda_{cls} \mathcal{L}_{BCE} + \lambda_{dfl} \mathcal{L}_{DFL} $$
+The \textbf{Complete Intersection over Union (CIoU)} loss accounts for overlap area, center point distance, and aspect ratio \cite{ResearchGate2024}. This ensures highly precise spatial localization for haptic feedback.
+
+\subsubsection{Multimodal Reasoning and Vision-Language Models}
+Traditional object detection is spatially aware but contextually ignorant. To bridge this gap, Neuralens integrates the Google Gemini API for "Cognitive Reasoning" \cite{Google2025}. Utilizing Vision-Language Models (VLMs) allows the system to synthesize raw visual data into human-centric descriptions (e.g., identifying if a sidewalk is blocked by construction), a higher-order reasoning task that standard labels miss \cite{arXiv2024}.
+
+\subsection{Domain II: Social Interaction and Biometrics}
+While navigation addresses physical safety, social autonomy requires the identification of individuals. This section reviews the transition from statistical facial measurements to deep embedding architectures.
+
+\subsubsection{Historical Evolution of Biometric Identification}
+Early facial analysis (1960s) required manual identification of landmarks \cite{bledsoe1966}. The 1990s introduced "Eigenfaces" utilizing Principal Component Analysis (PCA) \cite{turk1991}. However, these statistical methods remained sensitive to lighting and pose. The advent of deep learning (e.g., DeepFace) initiated a paradigm shift toward unconstrained face recognition by leveraging 3D alignment and deep CNNs \cite{taigman2014}.
+
+\subsubsection{Cascaded Networks for Face Detection (MTCNN)}
+Robust identification requires a high-fidelity trigger. Neuralens utilizes the Multi-task Cascaded Convolutional Neural Network (MTCNN), which employs a three-stage cascade:
+\begin{enumerate}
+ \item \textbf{Proposal Network (P-Net):} Generates candidate windows.
+ \item \textbf{Refine Network (R-Net):} Filters false positives.
+ \item \textbf{Output Network (O-Net):} Identifies five key facial landmarks for alignment \cite{zhang2016joint}.
+\end{enumerate}
+Benchmarking on the Raspberry Pi 4 indicates that MTCNN provides significantly higher accuracy (95.1\%) for rotated faces compared to Haar Cascades \cite{william2024eval}.
+
+\subsubsection{Deep Feature Extraction: InceptionResnetV1}
+The core identification module translates aligned face images into 512-dimensional Euclidean embeddings using the InceptionResnetV1 architecture \cite{szegedy2017}. 
+
+\paragraph{The Triplet Loss Paradigm}
+Building on FaceNet research, the system utilizes \textit{Triplet Loss} to optimize the embedding space. It minimizes the distance between an anchor and a positive (same identity) while maximizing the distance to a negative (different identity) \cite{schroff2015facenet}:
+\[L = \sum_{i}^{N} [\|f(x_i^a) - f(x_i^p)\|_2^2 - \|f(x_i^a) - f(x_i^n)\|_2^2 + \alpha]_+\]
+
+\paragraph{Metrics for Identity Search}
+To match embeddings against a local database, Neuralens employs Cosine Similarity, which measures angular alignment and is robust against scale variations \cite{choudhary2024unveiling}.
+$$ \text{Similarity}(A, B) = \frac{A \cdot B}{\|A\| \|B\|} $$
+Empirical evaluations support a 0.6 similarity threshold for stable decision boundaries on edge hardware \cite{raji2024similarity}.
+
+\subsection{System Optimization: The NCNN Framework}
+To achieve SOTA speeds for both YOLOv8 and InceptionResnetV1 within the 5.5W power envelope of the Pi, Neuralens employs the \textbf{NCNN} framework \cite{NCNN2025}.
+
+\subsubsection{Memory Pooling and Branch Prediction}
+NCNN is written in optimized C++ and implements custom memory pooling and branch prediction optimization. This ensures that every CPU cycle is utilized for inference, significantly reducing RAM consumption compared to TensorFlow Lite—crucial for the 4GB/8GB limits of the Pi 4B. \textbf{For person identification, the Pi CPU load is further mitigated by downsampling frames to 320 $\times$ 240 and utilizing torch.no\_grad() during embedding generation.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/ncnn.jpg}
+    \caption{NCNN Framework for Edge-AI}
+\end{figure}
+
+\subsubsection{INT8 Quantization}
+Quantization converts 32-bit weights ($FP32$) to 8-bit integers ($INT8$), reducing memory bandwidth demands:
+$$ Q(x) = \text{clip}\left( \text{round}\left( \frac{x}{scale} \right), -128, 127 \right) $$
+Research shows that while this increases speed by nearly $3 \times$ on mobile CPUs, the impact on Mean Average Precision (mAP) is less than $1\%$ \cite{rovai2024edge}.
+
+\subsection{Feedback Orchestration and Social Presence}
+The "latency-to-audio" pipeline is the critical user-facing component. 
+
+\subsubsection{Audio Engineering and Latency}
+Neuralens utilizes PyAudio to manage streams \textbf{via standard 3.5mm jack earphones}, optimizing frames per buffer ($N$) and sampling rate ($f_s$) to maintain latency $L < 100$ms:
+$$ L = \frac{N_{buffer}}{f_{sampling}} + \text{Processing Overhead} $$
+For offline environments, \textbf{eSpeak} is used for local synthesis, ensuring privacy and functionality during network drops \cite{PMC2025, ResearchGate2025}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{image/ocr.jpg}
+    \caption{OCR to Speech Pipeline}
+\end{figure}
+
+\subsubsection{Managing Sensory Load}
+Assistive technology must not cause "Sensory Fatigue." Standard systems that announce identities in every frame can overwhelm the user. Neuralens implements presence-tracking logic (greeting cooldowns of 10 seconds) to align with research suggesting humans only require confirmation upon initial contact or significant social shifts \cite{cummings2017presence}.
+
+\subsection{Identified Research Gaps}
+Despite rapid advancements, the literature reveals critical gaps:
+\begin{enumerate}
+ \item \textbf{The Continuity Gap:} SOTA systems are often bifurcated into 100\% offline (low intelligence) or 100\% online (high latency). There is a lack of research into "graceful degradation" for wearables.
+ \item \textbf{The Semantic Gap:} Most detectors provide labels ("car") but lack intent-based reasoning ("car is parking").
+ \item \textbf{The Biometric Gap:} Performance degradation caused by surgical masks and low-light conditions remains a significant barrier for edge-based identification \cite{nist2024mask}.
+ \item \textbf{The Ergonomic Gap:} There is a lack of documentation on bridging handheld accessibility apps and high-cost proprietary glasses via low-cost off-the-shelf components.
+\end{enumerate}
+
+\clearpage
